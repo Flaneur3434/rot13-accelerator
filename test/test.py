@@ -1,14 +1,19 @@
 # SPDX-FileCopyrightText: © 2024 Tiny Tapeout
 # SPDX-License-Identifier: Apache-2.0
 
+import codecs
+
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles, RisingEdge
 
 CLK_FREQ = 50_000_000
+
 BAUD_RATE = 115200
 CLOCKS_PER_BIT = CLK_FREQ // BAUD_RATE  # ~434
 
+def rot13(text):
+    return codecs.encode(text, 'rot_13')
 
 async def uart_send(dut, byte):
     """Send a single byte over UART (8N1) by bit-banging ui[0]."""
