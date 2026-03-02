@@ -28,6 +28,8 @@ We use parallel output because we would need to implement another TX UART state 
 
 ## How to test
 
+### Test harness details
+
 We will use cocobt framework to test our simulated DUT. We will write a simple python function to create UART frames to send to our DUT. We use `ClockCycles` to hold the correct bit value for 434 clock cycles to match the UART baud rate.
 
 ```python
@@ -46,7 +48,7 @@ async def uart_send(dut, byte):
         await ClockCycles(dut.clk, CLOCKS_PER_BIT)
 ```
 
-We will assert that decrypted cipher is correct.
+We will assert that the decrypted cipher is correct.
 ```python
 for char in "Uryyb":
     # convert ASCII characters into integer code point for hardware
@@ -54,6 +56,24 @@ for char in "Uryyb":
     # read parallel output
     assert chr(dut.uo_out.value) in "Hello"
 ```
+
+### Test cases
+To comprehensively test the ROT13 module, we have 3 test cases:
+
+| Test | Description |
+|------|-------------|
+| Functional correctness | Verifies that ROT13 decoding produces the expected plaintext output |
+| Non-alphabetic passthrough | Verifies that non-alphabetic characters are forwarded to the output unchanged |
+| Framing error recovery | Verifies that the receiver discards malformed UART frames and resynchronizes |
+
+#### Functional correctness
+Sends a simple ciphertext (`Uryyb`) and verifies that the output is correct (`Hello`).
+
+#### Non-alphabetic passthrough
+Tests to see if non-alphabetic characters such as `_|\` and numbers are passthrough to the output unmodified.
+
+#### Framing error recovery
+Sends a corrupted UART frame (low stop bit) and verifies that malformed frames are ignored and no garbage is outputed. Also verifies that the UART state machine recovers properly and resynchronizes so subsequent frames are properly parsed.
 
 ## External hardware
 
