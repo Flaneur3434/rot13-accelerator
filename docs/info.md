@@ -75,6 +75,10 @@ Tests to see if non-alphabetic characters such as `_|\` and numbers are passthro
 #### Framing error recovery
 Sends a corrupted UART frame (low stop bit) and verifies that malformed frames are ignored and no garbage is outputed. Also verifies that the UART state machine recovers properly and resynchronizes so subsequent frames are properly parsed.
 
+## Generative AI usage
+
+I used claude to help design the system verilog, test cases and debug failures. One notable bug was when uncovered during the broken frame test. When the stop bit stays low, my hardware design couldn't tell when a new frame started because I didn't reset the input pin to high. The UART protocol is idle high, so my state machine got confused and deserialized the subsequent frames wrongly. Claude was able to identify the bug and prove a fix.
+
 ## External hardware
 
 None
